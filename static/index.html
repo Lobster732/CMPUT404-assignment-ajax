@@ -39,7 +39,9 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
             try {
                 if (xhr.status==200) {
                     //XXX: parse some JSON from the request!
+                    var data = JSON.parse(xhr.responseText);
                     //XXX: Pass the data to the callback!
+                    callback(data);
                 }
             } 
             catch(e) {
@@ -48,10 +50,41 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
         }
     };
     //XXX: POST to a URL
+    xhr.open("POST", url);
     //XXX: set the mimetype and the accept headers!
     // Remember to use application/json !
+    xhr.setRequestHeader("Content-Type","application/json")
+    xhr.send(JSON.stringify(objects));
+
 }
 
+/* keeping this if we need to make one for GET
+function getJSONXMLHTTPRequest(url, objects, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState==4) {
+            try {
+                if (xhr.status==200) {
+                    //XXX: parse some JSON from the request!
+                    var data = JSON.parse(xhr.responseText);
+                    //XXX: Pass the data to the callback!
+                    callback(data);
+                }
+            } 
+            catch(e) {
+                alert('Error: ' + e.name);
+            }
+        }
+    };
+    //XXX: GET to a URL
+    xhr.open("GET", url);
+    //XXX: set the mimetype and the accept headers!
+    // Remember to use application/json !
+    xhr.setRequestHeader("Content-Type","application/json")
+    xhr.send(JSON.stringify(objects));
+}
+*/
+    drawNextFrame(); // (but should we?)
 
 world = {};
 
@@ -136,9 +169,13 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    drawNextFrame(); // (but should we?)
+    drawNextFrame();
+    function callback_function() {
+            drawNextFrame(); // (but should we?)
+    }
+    //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
-
+    sendJSONXMLHTTPRequest("/entity/"+entity, data, callback_function) 
 }
 
 var counter = 0;
@@ -184,7 +221,7 @@ mouse = (function() {
                 var pos = getPosition(e);
                 var x = pos[0];
                 var y = pos[1];
-	        self.clicked = 1;
+	            self.clicked = 1;
                 self.callListeners(self.mousedowners,x,y,self.clicked,e);
                 //addEntityWithoutName({'x':x,'y':y,'colour':'red'});
             }
@@ -262,7 +299,12 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
+    function callback_function(data) {
+        world = data;
+        drawNextFrame();
+        }
     drawFrame();
+    sendJSONXMLHTTPRequest("/world", {}, callback_function) 
 }
 
 // 30 frames per second
