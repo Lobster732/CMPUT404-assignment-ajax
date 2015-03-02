@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Copyright 2013 Abram Hindle
+# Copyright 2015 Thomas Curnow and Dylan Cassidy
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ def flask_post_json():
 
 @app.route("/")
 def hello():
-    '''Return something coherent here.. perhaps redirect to /static/index.html '''
+    '''redirect to /static/index.html '''
     #return render_template('index.html')
     return redirect('static/index.html')
 
@@ -86,7 +86,7 @@ def update(entity):
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
-    '''you should probably return the world here'''
+    '''return the world here'''
     return json.dumps(myWorld.world())
 
 @app.route("/entity/<entity>")    
@@ -97,7 +97,9 @@ def get_entity(entity):
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
-    return json.dumps(myWorld.clear())
+    myWorld.clear()
+    return json.dumps(myWorld.world())
+
 
 if __name__ == "__main__":
     app.run()

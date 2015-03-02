@@ -38,9 +38,7 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
         if (xhr.readyState==4) {
             try {
                 if (xhr.status==200) {
-                    //XXX: parse some JSON from the request!
                     var data = JSON.parse(xhr.responseText);
-                    //XXX: Pass the data to the callback!
                     callback(data);
                 }
             } 
@@ -49,56 +47,38 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
             }
         }
     };
-    //XXX: POST to a URL
     xhr.open("POST", url);
-    //XXX: set the mimetype and the accept headers!
     // Remember to use application/json !
     xhr.setRequestHeader("Content-Type","application/json")
     xhr.send(JSON.stringify(objects));
 
 }
-
-/* keeping this if we need to make one for GET
-function getJSONXMLHTTPRequest(url, objects, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState==4) {
-            try {
-                if (xhr.status==200) {
-                    //XXX: parse some JSON from the request!
-                    var data = JSON.parse(xhr.responseText);
-                    //XXX: Pass the data to the callback!
-                    callback(data);
-                }
-            } 
-            catch(e) {
-                alert('Error: ' + e.name);
-            }
-        }
-    };
-    //XXX: GET to a URL
-    xhr.open("GET", url);
-    //XXX: set the mimetype and the accept headers!
-    // Remember to use application/json !
-    xhr.setRequestHeader("Content-Type","application/json")
-    xhr.send(JSON.stringify(objects));
-}
-*/
-    drawNextFrame(); // (but should we?)
 
 world = {};
 
-//XXX: TODO Make this prettier!
+
+//random color generator
+function getRndColor() {
+    var r = 255*Math.random()|0,
+        g = 255*Math.random()|0,
+        b = 255*Math.random()|0;
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
 function drawCircle(context,entity) {
     with(context) {
         beginPath();              
-        lineWidth = 3;
         var x = entity["x"];
         var y = entity["y"];
         //moveTo(x,y);
-        fillStyle = entity["colour"];
-        strokeStyle = fillStyle;
+
         arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
+        //fillStyle = entity["colour"];
+        fillStyle = getRndColor();
+        fill()
+        lineWidth = 5;
+        strokeStyle = fillStyle;
+
         stroke();                                
     }
 }
@@ -130,7 +110,7 @@ function renderFrame() {
         drawCircle(context,prepEntity(entity));
     }
 }
-
+ce code must be reference
 var drawNext = true;
 
 // Signals that there's something to be drawn
@@ -173,8 +153,6 @@ function addEntity(entity, data) {
     function callback_function() {
             drawNextFrame(); // (but should we?)
     }
-    //drawNextFrame(); // (but should we?)
-    //XXX: Send a XHTML Request that updates the entity you just  modified!
     sendJSONXMLHTTPRequest("/entity/"+entity, data, callback_function) 
 }
 
@@ -282,14 +260,14 @@ mouse = (function() {
 })();
 
 // Add the application specific mouse listeners!
-//XXX: TODO Make these prettier!
 mouse.mousedowners.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'blue'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'blue','radius':25});
 });
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
-    addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    addEntityWithoutName({'x':x,'y':y,'colour':'red', 'radius':25});
 });
+
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'green',
@@ -298,7 +276,6 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 
 function update() {
-    //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
     function callback_function(data) {
         world = data;
         drawNextFrame();
